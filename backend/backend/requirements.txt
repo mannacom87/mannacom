@@ -1,0 +1,34 @@
+# requirements.txt
+
+# 파이썬 코드가 제대로 동작하는지 자동으로 검증해주는 테스트 도구(로컬)
+# pip install pytest
+# python -m pytest
+
+supabase>=2.4
+# Supabase Python SDK — DB(PostgreSQL)와 연동, CRUD/인증/스토리지 접근
+python-dotenv>=1.0,<2
+# .env 환경변수 로드 — API 키, DB URL 등을 코드와 분리하여 관리
+fastapi>=0.111,<1
+# 백엔드 API 프레임워크 — /trends 등 REST API 서버 구성
+uvicorn[standard]>=0.30
+# ASGI 서버 — FastAPI 실행용, 자동 리로드 기능 포함
+gunicorn>=21.2
+# 운영 환경용 프로세스 매니저 — uvicorn 워커와 함께 사용
+requests>=2.32.3
+# 동기 HTTP 클라이언트 — 외부 API, 크롤링 시 기본 요청용
+httpx>=0.27
+# 비동기 HTTP 클라이언트 — async 기반 API 호출 및 병렬 크롤링용
+tenacity>=8.5
+# 초고속 JSON 직렬화 — FastAPI 응답 속도 향상
+python-multipart>=0.0.9
+# 파일 업로드 지원 — FormData, 이미지 업로드 처리
+aiofiles>=23
+# 비동기 파일 입출력 — 썸네일/동영상 저장 시 사용
+python-dateutil>=2.9
+# 날짜 파싱 및 계산 — ISO8601 포맷 처리, 주간 집계 계산 등에 사용
+pydantic>=2.8
+# 데이터 검증 및 설정 관리 — FastAPI 모델링 및 데이터 유효성 검사
+rich>=13
+# 콘솔 로깅, 디버깅 시 시각화 출력 (선택)
+beautifulsoup4>=4.12.0
+# 구글 검색결과 크롤링용
