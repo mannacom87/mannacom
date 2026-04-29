@@ -1,0 +1,45 @@
+name: Google Shorts Scraper
+
+on:
+  schedule:
+    - cron: '37 23 * * *'
+  workflow_dispatch:
+    inputs:
+      extra_keyword:
+        description: '추가로 검색할 키워드 (선택, 1개)'
+        required: false
+        default: ''
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          cd backend/backend
+          pip install -r requirements.txt
+
+      - name: Random pre-run sleep (0~2976s)
+        run: |
+          SLEEP=$((RANDOM % 2976))
+          echo "Sleeping ${SLEEP}s before scraping"
+          sleep $SLEEP
+
+      - name: Run scraper
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          APP_ENV: prod
+          ACCOUNT_NAME: mannacom
+          EXTRA_KEYWORD: ${{ github.event.inputs.extra_keyword }}
+        run: |
+          cd backend/backend
+          python google_scraper.py
