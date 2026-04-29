@@ -253,10 +253,18 @@ def parse_results(html: str, keyword: str, region: str) -> List[ShortItem]:
     items = []
     seen_ids = set()
 
-    # 모든 a[href] 중 youtube/instagram/tiktok 링크만 추출
-    for a in soup.select("a[href]"):
+    # 카드 컨테이너 단위로 순회
+    cards = soup.select("div.MYHjcd, div.Z1YvVd")
+    if not cards:
+        # fallback: 전체 페이지에서 a[href] 훑기
+        cards = [soup]
+
+    for card in cards:
+        # URL 추출 (카드 안의 첫 a[href])
+        a = card.find("a", href=True)
+        if not a:
+            continue
         href = a.get("href", "")
-        # 구글 리다이렉트 URL 처리
         if href.startswith("/url?"):
             qs = urllib.parse.parse_qs(urllib.parse.urlparse(href).query)
             href = qs.get("q", [""])[0] or qs.get("url", [""])[0]
@@ -276,27 +284,40 @@ def parse_results(html: str, keyword: str, region: str) -> List[ShortItem]:
             continue
         seen_ids.add(key)
 
-        # 제목 추출 시도
-        title = a.get_text(strip=True) or ""
-        if not title:
-            # 부모/형제에서 텍스트 찾기
-            parent = a.find_parent()
-            if parent:
-                title = parent.get_text(strip=True)[:200]
+        # 제목
+        title_el = card.select_one("span.Yt787")
+        title = title_el.get_text(strip=True) if title_el else ""
 
-        # 썸네일 추출 시도
+        # 계정명 (span.E51IV 안의 마지막 span.jSLaVc)
+        nickname = None
+        ev = card.select_one("span.E51IV")
+        if ev:
+            ns = ev.select("span.jSLaVc")
+            if ns:
+                nickname = ns[-1].get_text(strip=True)
+
+        # 썸네일
         thumb = None
-        img = a.find("img")
+        img = card.select_one("div.kSFuOd img[src]")
         if img:
-            thumb = img.get("src") or img.get("data-src")
+            src = img.get("src", "")
+            if src.startswith("http"):
+                thumb = src
         if platform == "youtube" and not thumb and pid:
             thumb = f"https://i.ytimg.com/vi/{pid}/hqdefault.jpg"
+
+        # 제목이 비어있으면 aria-label에서 추출 시도
+        if not title:
+            aria = a.get("aria-label", "") or ""
+            if aria:
+                title = aria[:200]
 
         items.append(ShortItem(
             platform=platform,
             platform_id=pid,
             region=region,
             title=title or keyword,
+            nickname=nickname,
             thumbnail=thumb,
             video_url=href,
             keyword=keyword,
