@@ -43,3 +43,13 @@ jobs:
         run: |
           cd backend/backend
           python google_scraper.py
+
+      - name: Update views
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          APP_ENV: prod
+          ACCOUNT_NAME: mannacom
+        run: |
+          cd backend/backend
+          python view_updater.py
