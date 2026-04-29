@@ -327,7 +327,7 @@ class SupabaseWriter:
             d["crawled_at"] = utc_iso()
             rows.append(d)
         self.sb.table("shorts_items").upsert(
-            rows, on_conflict="platform,platform_id"
+            rows, on_conflict="platform,platform_id,source"
         ).execute()
         logging.info("Upserted %d rows", len(rows))
         return len(rows)
